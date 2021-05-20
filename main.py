@@ -25,31 +25,36 @@ print('변수가 재정의 됨')
 def get_message(update, context) :
     global eatTime
     req = update.message.text
-    print('request: ' + req)
+    print('req: ', req)
 
     print('get eat time: {}'.format(eatTime))
-    if req == '아침' or '점심' or '저녁':
+    if (req == '아침') or (req == '점심') or (req == '저녁'):
         eatTime = req
         update.message.reply_text("{}에 먹은 음식 사진을 보내주세요.".format(eatTime))
         print('get eat time: {}'.format(eatTime))
     else:
+        # hello username
         update.message.reply_text("hello " + update.message.from_user.first_name)
-        print('get eat time: {}'.format(eatTime))
 
 # photo reply function
 def get_photo(update, context) :
+    global eatTime
+    # 먹은 시간 설정 안돼있으면 먹은 시간 요청
+    if not ((eatTime == '아침') or (eatTime == '점심') or (eatTime == '저녁')):
+        update.message.reply_text('먹은 시간을 알려주세요. (아침/점심/저녁)')
+        return
+
     file_path = os.path.join(path, 'from_telegram.png')
     photo_id = update.message.photo[-1].file_id  # photo 번호가 높을수록 화질이 좋음
     photo_file = context.bot.getFile(photo_id)
     photo_file.download(file_path)
-    #update.message.reply_text('photo saved')
     time.sleep(1.)
 
-    global eatTime
+
     print('먹은 시간: ' + eatTime)
     if os.path.isfile(path + 'from_telegram.png'):
-        # label = labels_list[predict_output(model, path+'from_telegram.png')]
-        foodname = labels_list[0]
+        foodname = labels_list[predict_output(model, path+'from_telegram.png')]
+        #foodname = labels_list[label]
         update.message.reply_text('{}에 먹은 음식은 {}입니다.'.format(eatTime, foodname))
         print(eatTime)
 
@@ -64,6 +69,8 @@ def get_photo(update, context) :
         elif eatTime == '저녁':
             dbm.insert(username, '2021-05-21', 'dinner', foodname)
             print('database 저장 완료.')
+        else:
+            update.message.reply_text('다시 보내주세요.')
 
     else:
         update.message.reply_text('다시 보내주세요.')
@@ -78,8 +85,8 @@ def print_hi(name):
 if __name__ == '__main__':
     api_key = '1760236283:AAFcjOBmTOM8MPWNUZrhDfGN52-ToK4YAfw'
     labels_list = ['Grilled Mackerel', 'bibimbap', 'fish sushi', 'fruit salad', 'gimbap', 'jajangmyeon', 'miyeokguk',
-                   'ramen','seolleongtang', 'spaghetti', 'tteokbokki', 'tteokguk']
-    # model = load_model()
+                   'ramen', 'seolleongtang', 'spaghetti', 'tteokbokki', 'tteokguk']
+    model = load_model()
     print('start telegram chat bot')
 
     updater = Updater(api_key, use_context=True)
