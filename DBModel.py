@@ -40,6 +40,7 @@ class DBModel:
         result = self.cursor.fetchall()
 
         if result:
+            print(username + '데이터 존재함')
             # update
             sql = '''UPDATE history SET {}='{}'
              WHERE username = '{}' AND userdate = '{}';'''\
@@ -48,9 +49,10 @@ class DBModel:
             self.db_diet.commit()
             print('update complete')
         else:
+            print(username + '데이터 추가함')
             # insert
             sql = '''INSERT INTO `history` (username, userdate, {})
-             VALUES ('{}', '2021-05-20', '{}');'''.format(eatTime, username, foodname)
+             VALUES ('{}', '{}', '{}');'''.format(eatTime, username, userdate, foodname)
             self.cursor.execute(sql)
             self.db_diet.commit()
             print('insert complete')
