@@ -18,7 +18,6 @@ dbm = DBModel.DBModel()
 
 '''전역변수 정의'''
 eatTime='처음'
-print('변수가 재정의 됨')
 
 '''Handler 정의'''
 # reply username
@@ -27,11 +26,19 @@ def get_message(update, context) :
     req = update.message.text
     print('req: ', req)
 
-    print('get eat time: {}'.format(eatTime))
     if (req == '아침') or (req == '점심') or (req == '저녁'):
         eatTime = req
         update.message.reply_text("{}에 먹은 음식 사진을 보내주세요.".format(eatTime))
         print('get eat time: {}'.format(eatTime))
+
+    elif req.count('오늘') > 0:
+        username = update.message.from_user.first_name
+        userdate = '2021-05-21'
+        foodlist = dbm.selectByNameDate(username, userdate)
+
+        print(foodlist)
+        update.message.reply_text("오늘 먹은 음식은 {}, {}, {} 입니다."
+                                  .format(foodlist[0], foodlist[1], foodlist[2]))
     else:
         # hello username
         update.message.reply_text("hello " + update.message.from_user.first_name)
@@ -39,6 +46,7 @@ def get_message(update, context) :
 # photo reply function
 def get_photo(update, context) :
     global eatTime
+    userdate = '2021-05-21' # 추후 동적으로 수정
     # 먹은 시간 설정 안돼있으면 먹은 시간 요청
     if not ((eatTime == '아침') or (eatTime == '점심') or (eatTime == '저녁')):
         update.message.reply_text('먹은 시간을 알려주세요. (아침/점심/저녁)')
@@ -61,13 +69,13 @@ def get_photo(update, context) :
         username = update.message.from_user.first_name
 
         if eatTime == '아침':
-            dbm.insert(username, '2021-05-21', 'breakfast', foodname)
+            dbm.insert(username, userdate, 'breakfast', foodname)
             print('database 저장 완료.')
         elif eatTime == '점심':
-            dbm.insert(username, '2021-05-21', 'lunch', foodname)
+            dbm.insert(username, userdate, 'lunch', foodname)
             print('database 저장 완료.')
         elif eatTime == '저녁':
-            dbm.insert(username, '2021-05-21', 'dinner', foodname)
+            dbm.insert(username, userdate, 'dinner', foodname)
             print('database 저장 완료.')
         else:
             update.message.reply_text('다시 보내주세요.')
