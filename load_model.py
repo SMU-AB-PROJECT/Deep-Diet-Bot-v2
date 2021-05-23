@@ -38,7 +38,7 @@ def predict_output(model, in_path):
     out = model.predict(img)
     return (np.argmax(out))
 def load_model():
-    model = tf.keras.models.load_model('eff_final.h5')
+    model = tf.keras.models.load_model('models/eff_final.h5')
     return model
 #
 # def training_test():
