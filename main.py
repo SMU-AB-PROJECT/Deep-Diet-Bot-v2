@@ -18,27 +18,42 @@ dbm = DBModel.DBModel()
 
 '''전역변수 정의'''
 eatTime='처음'
+userdate = '2021-05-23'
 
 '''Handler 정의'''
 # reply username
 def get_message(update, context) :
     global eatTime
+    global userdate
     req = update.message.text
     print('req: ', req)
 
+    # 사용자가 언제 음식을 먹었는지 저장
     if (req == '아침') or (req == '점심') or (req == '저녁'):
         eatTime = req
         update.message.reply_text("{}에 먹은 음식 사진을 보내주세요.".format(eatTime))
         print('get eat time: {}'.format(eatTime))
 
+    # 오늘 먹은 음식을 바탕으로 피드백 제공
     elif req.count('오늘') > 0:
         username = update.message.from_user.first_name
-        userdate = '2021-05-21'
         foodlist = dbm.selectByNameDate(username, userdate)
 
         print(foodlist)
         update.message.reply_text("오늘 먹은 음식은 {}, {}, {} 입니다."
                                   .format(foodlist[0], foodlist[1], foodlist[2]))
+
+
+    # 도움말
+    elif req.count('help') > 0 or req.count('사용법') > 0:
+        msg = "안녕하세요 딥다이어트 챗봇입니다."
+        msg += "\n사용방법은"
+        msg += "\n\n아침/점심/저녁 메시지 전송 후"
+        msg += "\n먹은 음식사진 보내기"
+        msg += "\n\n오늘 메시지 전송 후"
+        msg += "\n결과 보기"
+        update.message.reply_text(msg)
+
     else:
         # hello username
         update.message.reply_text("hello " + update.message.from_user.first_name)
@@ -46,7 +61,7 @@ def get_message(update, context) :
 # photo reply function
 def get_photo(update, context) :
     global eatTime
-    userdate = '2021-05-21' # 추후 동적으로 수정
+    global userdate
     # 먹은 시간 설정 안돼있으면 먹은 시간 요청
     if not ((eatTime == '아침') or (eatTime == '점심') or (eatTime == '저녁')):
         update.message.reply_text('먹은 시간을 알려주세요. (아침/점심/저녁)')
