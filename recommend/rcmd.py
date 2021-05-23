@@ -142,75 +142,80 @@ def make_plot(back_scailed_list, std_list,col,n):
     plt.show()
     plt.savefig('./savefig_default.png')
 
-def deep_diet1(height,sex,weight,eaten):
-    kcal_df = pd.read_csv("/Users/chanju/github/project/deepdiet/이찬주/gooon.csv",encoding='CP949')
-    kcal_df = kcal_df.drop(['Unnamed: 5','Unnamed: 7'],axis=1)
-    my_kcal = get_kcal(height,sex)
+
+def deep_diet1(height, sex, weight, eaten):
+    kcal_df = pd.read_csv('C:\\Users\\yoonho\Desktop\\Deep-Diet-Bot-master\\recommend\\gooon.csv', encoding='CP949')
+    kcal_df = kcal_df.drop(['Unnamed: 5', 'Unnamed: 7'], axis=1)
+    my_kcal = get_kcal(height, sex)
     kcal_goon = kcal_goonn(my_kcal, kcal_df)
-    kcal_goon = kcal_goon[['곡류','채소류','과일류','고기.생선 달걀.콩류','우유 유제품류','유지 당류']]
+    kcal_goon = kcal_goon[['곡류', '채소류', '과일류', '고기.생선 달걀.콩류', '우유 유제품류', '유지 당류']]
     goon_list = kcal_goon.values.tolist()
     goon_list = [y for x in goon_list for y in x]
-    std_nutrient = [my_kcal, 300, 51, (weight*0.91), 600]
-
+    std_nutrient = [my_kcal, 300, 51, (weight * 0.91), 600]
 
     for i in range(5):
         std_nutrient[i] = float(std_nutrient[i])
-    
-    min_max_user =  goon_list + std_nutrient
-    
-    df = pd.read_csv("/Users/chanju/github/project/deepdiet/이찬주/database.csv")
-    #df =df.drop(['Unnamed: 2','Unnamed: 4','Unnamed: 9','Unnamed: 11','Unnamed: 13','Unnamed: 15','Unnamed: 17','Unnamed: 19','Unnamed: 21','Unnamed: 23'],axis=1)
-    df = df.rename({'영양소 함량':'곡류','Unnamed: 6':'재료량','Unnamed: 7':'과일','Unnamed: 8':'육류','Unnamed: 10':'우유','Unnamed: 12':'유지','영양소 함량.1':'에너지 (kcal)','Unnamed: 16':'탄수화물 (g)', 'Unnamed: 18':'지질 (g)','Unnamed: 20':'단백질 (g)','Unnamed: 22':'칼슘 (mg)'},axis=1)
-    df= df.dropna()
-    cols=['곡류','채소','과일','육류','우유','유지','칼로리','탄수화물','지질','단백질','칼슘']
 
-    for idx,co in enumerate(cols):
-        df[co] = ((df[co] - 0)/(min_max_user[idx]-0))
-    
-    col2 = ['음식명','곡류','채소','과일','육류','우유','유지']
+    min_max_user = goon_list + std_nutrient
+
+    df = pd.read_csv('C:\\Users\\yoonho\Desktop\\Deep-Diet-Bot-master\\recommend\\database.csv')
+    # df =df.drop(['Unnamed: 2','Unnamed: 4','Unnamed: 9','Unnamed: 11','Unnamed: 13','Unnamed: 15','Unnamed: 17','Unnamed: 19','Unnamed: 21','Unnamed: 23'],axis=1)
+    df = df.rename({'영양소 함량': '곡류', 'Unnamed: 6': '재료량', 'Unnamed: 7': '과일', 'Unnamed: 8': '육류', 'Unnamed: 10': '우유',
+                    'Unnamed: 12': '유지', '영양소 함량.1': '에너지 (kcal)', 'Unnamed: 16': '탄수화물 (g)', 'Unnamed: 18': '지질 (g)',
+                    'Unnamed: 20': '단백질 (g)', 'Unnamed: 22': '칼슘 (mg)'}, axis=1)
+    df = df.dropna()
+    cols = ['곡류', '채소', '과일', '육류', '우유', '유지', '칼로리', '탄수화물', '지질', '단백질', '칼슘']
+
+    for idx, co in enumerate(cols):
+        df[co] = ((df[co] - 0) / (min_max_user[idx] - 0))
+
+    col2 = ['음식명', '곡류', '채소', '과일', '육류', '우유', '유지']
     goon = df[col2]
-    
-    col4 = ['음식명','칼로리','탄수화물','지질','단백질','칼슘']
+
+    col4 = ['음식명', '칼로리', '탄수화물', '지질', '단백질', '칼슘']
     nutrient = df[col4]
-    
-    col = ['곡류','고기.생선 달걀.콩류','채소류','과일류','우유 유제품류','유지 당류']
+
+    col = ['곡류', '고기.생선 달걀.콩류', '채소류', '과일류', '우유 유제품류', '유지 당류']
     recmd_goon = kcal_goon[col].values.tolist()
-    
-    col3 = ['곡류','채소','과일','육류','우유','유지']
-    eaten_goon=[]
-    # 오늘 먹은 식품군들을 한 개의 list로 만들기 
+
+    col3 = ['곡류', '채소', '과일', '육류', '우유', '유지']
+    eaten_goon = []
+    # 오늘 먹은 식품군들을 한 개의 list로 만들기
     for food in eaten:
         eaten_goon.append(goon[goon['음식명'] == food][col3].values.tolist())
-    
+
     eaten_goon_add = []
-    eaten_goon_add = add_today(eaten_goon,eaten_goon_add,6)
-    
+    eaten_goon_add = add_today(eaten_goon, eaten_goon_add, 6)
+
     lack_goon = []
-    lack_goon = substract_today(recmd_goon[0],eaten_goon_add,lack_goon,6)
-    
-    col5 = ['칼로리','탄수화물','지질','단백질','칼슘']
+    lack_goon = substract_today(recmd_goon[0], eaten_goon_add, lack_goon, 6)
+
+    col5 = ['칼로리', '탄수화물', '지질', '단백질', '칼슘']
     eaten_nutrient = []
     for food in eaten:
-        eaten_nutrient.append(nutrient[nutrient['음식명']== food][col5].values.tolist())
+        eaten_nutrient.append(nutrient[nutrient['음식명'] == food][col5].values.tolist())
     eaten_nutrient_add = []
-    eaten_nutrient_add = add_today(eaten_nutrient,eaten_nutrient_add,5)
+    eaten_nutrient_add = add_today(eaten_nutrient, eaten_nutrient_add, 5)
     lack_nutrient = []
-    lack_nutrient = substract_today(std_nutrient,eaten_nutrient_add,lack_nutrient,5)
-    
-    same_goon = get_same_cluster(goon,lack_goon,5)
-    same_nutrient = get_same_cluster(nutrient,lack_nutrient,4)
-    goon_d = goon.drop(['음식명'],axis=1)
-    nutrient_d = nutrient.drop(['음식명'],axis=1)
-    
-    recommend_food = recommend_foodd(goon,lack_goon,5,nutrient,lack_nutrient,4)
-    
-    #back_scailded_goon = back_scailing(lack_goon, goon_list,6)
-    #plot_goon = make_plot(back_scailded_goon,goon_list,col3,6)
-    #back_scailed_nutrient = back_scailing(lack_nutrient,std_nutrient,5)
-    #plot_nutrient = make_plot(back_scailed_nutrient,std_nutrient,col5,5)
-    return recommend_food #, plot_goon , plot_nutrient
+    lack_nutrient = substract_today(std_nutrient, eaten_nutrient_add, lack_nutrient, 5)
 
-deep_diet1(1.8,'man',80,['팥빵','피자','유부초밥'])
+    same_goon = get_same_cluster(goon, lack_goon, 5)
+    same_nutrient = get_same_cluster(nutrient, lack_nutrient, 4)
+    goon_d = goon.drop(['음식명'], axis=1)
+    nutrient_d = nutrient.drop(['음식명'], axis=1)
 
+    recommend_food = recommend_foodd(goon, lack_goon, 5, nutrient, lack_nutrient, 4)
+    recommended_food = []
 
-# %%
+    for i in range(len(recommend_food)):
+        recommended_food.append(list(np.array(recommend_food[i].tolist())))
+
+    # back_scailded_goon = back_scailing(lack_goon, goon_list,6)
+    # plot_goon = make_plot(back_scailded_goon,goon_list,col3,6)
+    # back_scailed_nutrient = back_scailing(lack_nutrient,std_nutrient,5)
+    # plot_nutrient = make_plot(back_scailed_nutrient,std_nutrient,col5,5)
+    return recommended_food  # , plot_goon , plot_nutrient
+
+## 테스트
+# result = deep_diet1(1.8,'man',80,['떡볶이','김밥','비빔밥'])
+# print(result[0][0])

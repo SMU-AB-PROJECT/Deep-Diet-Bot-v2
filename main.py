@@ -8,6 +8,7 @@ from load_model import load_model,predict_output
 import tensorflow as tf
 import DBModel
 import time
+import recommend.rcmd as rcmd
 
 '''파일이 저장될 directory: 환경에 맞는 경로 수정 필요'''
 path = 'C:\\deepdiet-files\\'
@@ -17,8 +18,17 @@ dir_now = os.path.dirname(os.path.abspath(path))  # real path to dirname
 dbm = DBModel.DBModel()
 
 '''전역변수 정의'''
+api_key = '1760236283:AAFcjOBmTOM8MPWNUZrhDfGN52-ToK4YAfw'
+labels_list = ['고등어구이', '비빔밥', '생선초밥', '과일샐러드', '김밥', '짜장면', '미역국',
+               '라면', '설렁탕', '스파게티', '떡볶이', '떡국']
 eatTime='처음'
 userdate = '2021-05-23'
+
+'''기타 함수 정의'''
+def getRcmd(height,sex,weight,eaten):
+    result = rcmd.deep_diet1(height,sex,weight,eaten)
+    print(result)
+    return result
 
 '''Handler 정의'''
 # reply username
@@ -38,10 +48,20 @@ def get_message(update, context) :
     elif req.count('오늘') > 0:
         username = update.message.from_user.first_name
         foodlist = dbm.selectByNameDate(username, userdate)
+        foodlist = list([foodlist[0], foodlist[1], foodlist[2]])
 
         print(foodlist)
         update.message.reply_text("오늘 먹은 음식은 {}, {}, {} 입니다."
                                   .format(foodlist[0], foodlist[1], foodlist[2]))
+
+        # print(rcmd.deep_diet1(1.8,'man',80,['팥빵','피자','유부초밥']))
+
+        recoList = rcmd.deep_diet1(1.8,'man',80,foodlist)
+        rl =[]
+        for reco in recoList:
+            rl.append(reco[0])
+        msg = '영양성분 분석 결과 추천 음식은 {} 입니다.'.format(rl)
+        update.message.reply_text(msg)
 
 
     # 도움말
@@ -106,9 +126,6 @@ def print_hi(name):
 
 
 if __name__ == '__main__':
-    api_key = '1760236283:AAFcjOBmTOM8MPWNUZrhDfGN52-ToK4YAfw'
-    labels_list = ['Grilled Mackerel', 'bibimbap', 'fish sushi', 'fruit salad', 'gimbap', 'jajangmyeon', 'miyeokguk',
-                   'ramen', 'seolleongtang', 'spaghetti', 'tteokbokki', 'tteokguk']
     model = load_model()
     print('start telegram chat bot')
 
